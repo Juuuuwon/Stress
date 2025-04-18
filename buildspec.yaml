@@ -24,6 +24,7 @@ phases:
           exit 1
         fi
       - echo "Build success."
+      - sed -i "s|<IMAGE_URI>|$ECR_URL:$TAG|" imagedefinitions.json
       - ls
       - cat imagedefinitions.json
 reports:
