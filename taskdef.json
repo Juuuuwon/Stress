@@ -33,7 +33,7 @@
                     "mode": "non-blocking",
                     "awslogs-create-group": "true",
                     "max-buffer-size": "25m",
-                    "awslogs-region": "us-east-1",
+                    "awslogs-region": "ap-northeast-2",
                     "awslogs-stream-prefix": "ecs"
                 },
                 "secretOptions": []
