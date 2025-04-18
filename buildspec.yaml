@@ -24,6 +24,12 @@ phases:
           exit 1
         fi
       - echo "Build success."
+      - ls
+      - cat imagedefinitions.json
+reports:
+  my-report:
+    files:
+    - "**/*"
 artifacts:
     files:
       - "**/*"
