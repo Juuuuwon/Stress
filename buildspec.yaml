@@ -1,0 +1,29 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - ln -sf /usr/share/zoneinfo/Asia/Seoul /etc/localtime
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $ECR_URL
+      - TAG=$(date '+%Y%m%d.%H%M%S')
+  build:
+    commands:
+      - docker build -t $ECR_URL:$TAG .
+  post_build:
+    commands:
+      - docker push $ECR_URL:$TAG
+      - |
+        until [ "$(aws ecr describe-image-scan-findings --repository-name=$REPO_NAME --image-id=imageTag=$TAG | jq -r '.imageScanStatus.status')" = "COMPLETE" ]; do
+          echo "$(aws ecr describe-image-scan-findings --repository-name=$REPO_NAME --image-id=imageTag=$TAG | jq -r '.imageScanStatus.status')"
+          sleep 2
+        done
+      - |
+        VULNS=$(aws ecr describe-image-scan-findings --repository-name=$REPO_NAME --image-id=imageTag=$TAG | jq '.imageScanFindings.findings | length')
+        if [ "$VULNS" -ne 0 ]; then
+          echo "Security vulnerabilities detected: $VULNS"
+          exit 1
+        fi
+      - echo "Build success."
+artifacts:
+    files:
+      - "**/*"
